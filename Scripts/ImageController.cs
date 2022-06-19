@@ -9,13 +9,10 @@ using UnityEngine.XR.ARSubsystems;
 
 public class ImageController : MonoBehaviour
 {
-    // ячейка под отслеживаемый объект
     public GameObject Anchor;
 
-    // ячейка под объект, который устанавливается относительно Anchor
     public GameObject Room;
     
-    // ячейки под элементы интерфейса
     public GameObject AnchorController;
     private GameObject SaveButton;
     private GameObject MoveButtons;
@@ -24,7 +21,6 @@ public class ImageController : MonoBehaviour
     public GameObject ScrollView;
     public GameObject ARCamera;
 
-    // яейки для создания кнопки
     public GameObject[] Buttons;
     public GameObject ButtonPrefab;
     public GameObject Content;
@@ -54,7 +50,6 @@ public class ImageController : MonoBehaviour
 
     private Vector2 TouchPosition;
 
-    // скрипт, отвечающий за отслеживание изображений (меток)
     private ARTrackedImageManager ARTrackedImageManagerScript;
     private ARRaycastManager ARRaycastManagerScript;
     public ShowWay ShowWayScript;
@@ -62,41 +57,34 @@ public class ImageController : MonoBehaviour
 
     private void Awake()
     {
-        // Создание ссылки на скрипт, отвечающий за отслеживание изображений (меток) 
         ARTrackedImageManagerScript = FindObjectOfType<ARTrackedImageManager>();
-        // Создание ссылки на скрипт, отвечающий за информационные лучи
         ARRaycastManagerScript = FindObjectOfType<ARRaycastManager>();
 
-       // помещаем элементы интерфейса в соответсвующие им ячейки
         SaveButton = GameObject.Find("ControllButtons/SaveButton");
         MoveButtons = GameObject.Find("ControllButtons/MoveButtons");
         SetGizmoButton = GameObject.Find("ControllButtons/SetGizmoButton");
         MarkerButton = GameObject.Find("MarkerButton");
         ScrollView = GameObject.Find("Scroll View");
-       // выключаем видимость элементов интерфейса
+
         SaveButton.SetActive(false);
         MoveButtons.SetActive(false);
         MarkerButton.SetActive(false);
         ScrollView.SetActive(false);
     }
 
-    // Update is called once per frame
     void Update()
     {
-       // Установка нулевой системы координат в середине маркера
         AnchorControll();
        
-        // Создание нового пути
         AddNewWay();
 
         MoveAndRotateObject();
 
-        // Добавление меток в новосозданный путь
         if (AddObjectsToWay && AddArrow)
         {
             ShowMarkerAndSetObject();
         }
-        // Отображение выбранного кнопкой пути
+
         if (ShowWay)
         {
             int i = 0;
@@ -114,20 +102,15 @@ public class ImageController : MonoBehaviour
 
     }
 
-    // ReSharper disable Unity.PerformanceAnalysis
     private void AnchorControll()
     {
-        // Нахождение в сцене объекта с тэгом Anchor
         Anchor = GameObject.FindWithTag("Anchor");
-        // Присваивание объекту имени Anchor
         Anchor.name = "Anchor";
 
         if (SetAnchor)
         {
-            // Установка объекта Room в место объекта Anchor
             Instantiate(Room, Anchor.transform.position, Anchor.transform.rotation);
 
-            // Отключение отслеживания изображений (меток)
             ARTrackedImageManagerScript.SetTrackablesActive(false);
 
             SetAnchor = false;
@@ -155,18 +138,15 @@ public class ImageController : MonoBehaviour
     {
         if (NewButton)
         {
-            // Создание новой кнопки (перемещение его в Content и изменение её текста)
             Buttons[Index] = Instantiate(ButtonPrefab);
             Buttons[Index].transform.parent = Content.gameObject.transform;
             Buttons[Index].transform.GetChild(0).GetComponent<Text>().text = (124 + Index).ToString();
-            // Получение скрипта ShowWay, который прикреплен к кнопке
+
             ShowWayScript = Buttons[Index].GetComponent<ShowWay>();
-            // Присваиваие переменной Index в скрипте ShowWay значения Index данного скрипта
+
             ShowWayScript.Index = Index;
 
-            // Создание ячейки под хранение меток пути (создание пути)
             Ways[Index] = Instantiate(VersionOfWay, Room.transform.position, Room.transform.rotation);
-            // Создание первой метки пути
             
             WayPoint = Instantiate(WayPointPrefab, ARCamera.transform.position, ARCamera.transform.rotation);
             WayPoint.gameObject.transform.parent = Ways[Index].gameObject.transform;
@@ -180,7 +160,7 @@ public class ImageController : MonoBehaviour
             Index += 1;
         }
     }
-    // Функция, отвечающая за установка маркера в маршрут при выполенении условия, что расстояние между вашим телефоном и последним установленным маркером больше 1-го метра
+
     private void AddObjectToWayFunction(List<ARRaycastHit> hits)
     {
             WayPoint = Instantiate(WayPointPrefab, hits[0].pose.position, Quaternion.Euler(WayPointPrefab.transform.rotation.x, ARCamera.transform.rotation.y, WayPointPrefab.transform.rotation.z));
@@ -240,7 +220,6 @@ public class ImageController : MonoBehaviour
                 Ray ray = ArCameraCamera.ScreenPointToRay(touch.position);
                 RaycastHit hitObject;
 
-                // Select choosed object
                 if (Physics.Raycast(ray, out hitObject))
                 {
                     if (hitObject.collider.CompareTag("UnSelected"))
@@ -256,7 +235,7 @@ public class ImageController : MonoBehaviour
             {
                 List<ARRaycastHit> hits = new List<ARRaycastHit>();
                 ARRaycastManagerScript.Raycast(new Vector2(Screen.width / 2, Screen.height / 2), hits, TrackableType.Planes);
-                // Move Object
+
                 ARRaycastManagerScript.Raycast(TouchPosition, hits, TrackableType.Planes);
                 SelectedObject.transform.position = hits[0].pose.position;
             }
